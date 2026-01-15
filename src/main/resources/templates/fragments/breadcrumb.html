@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+    <!-- Breadcrumb Navigation Fragment -->
+    <nav th:fragment="breadcrumb(currentStep)" class="breadcrumb-nav" aria-label="Breadcrumb">
+        <ol class="breadcrumb">
+            <!-- Dashboard -->
+            <li class="breadcrumb-item" th:classappend="${currentStep == 'dashboard'} ? 'active' : ''">
+                <a th:href="@{/dashboard}" th:if="${currentStep != 'dashboard'}">
+                    <span class="breadcrumb-icon">🏠</span>
+                    <span class="breadcrumb-text">Dashboard</span>
+                </a>
+                <span th:if="${currentStep == 'dashboard'}">
+                    <span class="breadcrumb-icon">🏠</span>
+                    <span class="breadcrumb-text">Dashboard</span>
+                </span>
+            </li>
+
+            <!-- Debit Services -->
+            <li class="breadcrumb-item" th:classappend="${currentStep == 'debit-services'} ? 'active' : ''"
+                th:if="${currentStep != 'dashboard'}">
+                <a th:href="@{/debit-services}" th:if="${currentStep != 'debit-services'}">
+                    <span class="breadcrumb-icon">💳</span>
+                    <span class="breadcrumb-text">Debit Services</span>
+                </a>
+                <span th:if="${currentStep == 'debit-services'}">
+                    <span class="breadcrumb-icon">💳</span>
+                    <span class="breadcrumb-text">Debit Services</span>
+                </span>
+            </li>
+
+            <!-- Card Request -->
+            <li class="breadcrumb-item" th:classappend="${currentStep == 'card-request'} ? 'active' : ''"
+                th:if="${currentStep == 'card-request' || currentStep == 'address-selection' || currentStep == 'review' || currentStep == 'otp' || currentStep == 'success'}">
+                <a th:href="@{/card-request}" th:if="${currentStep != 'card-request'}">
+                    <span class="breadcrumb-icon">📝</span>
+                    <span class="breadcrumb-text">Card Request</span>
+                </a>
+                <span th:if="${currentStep == 'card-request'}">
+                    <span class="breadcrumb-icon">📝</span>
+                    <span class="breadcrumb-text">Card Request</span>
+                </span>
+            </li>
+
+            <!-- Address Selection -->
+            <li class="breadcrumb-item" th:classappend="${currentStep == 'address-selection'} ? 'active' : ''"
+                th:if="${currentStep == 'address-selection' || currentStep == 'review' || currentStep == 'otp' || currentStep == 'success'}">
+                <span class="breadcrumb-icon">📍</span>
+                <span class="breadcrumb-text">Address</span>
+            </li>
+
+            <!-- Review -->
+            <li class="breadcrumb-item" th:classappend="${currentStep == 'review'} ? 'active' : ''"
+                th:if="${currentStep == 'review' || currentStep == 'otp' || currentStep == 'success'}">
+                <span class="breadcrumb-icon">👁️</span>
+                <span class="breadcrumb-text">Review</span>
+            </li>
+
+            <!-- OTP Verification -->
+            <li class="breadcrumb-item" th:classappend="${currentStep == 'otp'} ? 'active' : ''"
+                th:if="${currentStep == 'otp' || currentStep == 'success'}">
+                <span class="breadcrumb-icon">🔐</span>
+                <span class="breadcrumb-text">Verify OTP</span>
+            </li>
+
+            <!-- Success -->
+            <li class="breadcrumb-item" th:classappend="${currentStep == 'success'} ? 'active' : ''"
+                th:if="${currentStep == 'success'}">
+                <span class="breadcrumb-icon">✅</span>
+                <span class="breadcrumb-text">Success</span>
+            </li>
+        </ol>
+    </nav>
+</body>
+
+</html>

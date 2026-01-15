@@ -1,0 +1,123 @@
+/* ========================================
+   BREADCRUMB NAVIGATION STYLES
+   ======================================== */
+
+.breadcrumb-nav {
+    background: white;
+    padding: 15px 60px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 20px;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #666;
+    position: relative;
+}
+
+.breadcrumb-item a {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #666;
+    text-decoration: none;
+    transition: color 0.2s;
+    padding: 6px 10px;
+    border-radius: 6px;
+}
+
+.breadcrumb-item a:hover {
+    color: var(--sib-red);
+    background: rgba(166, 25, 46, 0.05);
+}
+
+.breadcrumb-item.active {
+    color: var(--sib-red);
+    font-weight: 600;
+}
+
+.breadcrumb-item.active span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: rgba(166, 25, 46, 0.1);
+    border-radius: 6px;
+}
+
+.breadcrumb-icon {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.breadcrumb-text {
+    white-space: nowrap;
+}
+
+/* Breadcrumb Separator */
+.breadcrumb-item:not(:last-child)::after {
+    content: '›';
+    margin-left: 8px;
+    color: #ccc;
+    font-size: 1.2rem;
+    font-weight: 300;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .breadcrumb-nav {
+        padding: 12px 20px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .breadcrumb {
+        flex-wrap: nowrap;
+        gap: 4px;
+    }
+
+    .breadcrumb-item {
+        font-size: 0.8rem;
+    }
+
+    .breadcrumb-text {
+        display: none;
+    }
+
+    .breadcrumb-icon {
+        font-size: 1.1rem;
+    }
+
+    .breadcrumb-item a,
+    .breadcrumb-item.active span {
+        padding: 6px 8px;
+    }
+
+    .breadcrumb-item:not(:last-child)::after {
+        margin-left: 4px;
+        font-size: 1rem;
+    }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+    .breadcrumb-nav {
+        padding: 10px 15px;
+    }
+
+    .breadcrumb-icon {
+        font-size: 1rem;
+    }
+}

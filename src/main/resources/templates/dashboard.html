@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#A6192E">
+    <link rel="manifest" th:href="@{/manifest.json}">
+    <link rel="apple-touch-icon" th:href="@{/images/icons/icon-192x192.png}">
+    <title>SIB Portal - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/responsive.css}">
+    <link rel="stylesheet" th:href="@{/css/skeleton.css}">
+</head>
+
+<body style="display: flex; flex-direction: column; min-height: 100vh;">
+
+    <!-- Navbar -->
+    <nav class="dash-nav">
+        <div class="nav-logo">
+            <img th:src="@{/images/logo.png}" alt="South Indian Bank" style="height: 50px; width: auto;">
+        </div>
+        <div class="nav-search">
+            <input type="text" placeholder="Search here">
+        </div>
+        <div class="nav-icons">
+            🔔
+        </div>
+    </nav>
+
+    <!-- Hero Profile Section -->
+    <div class="hero-profile">
+        <div class="profile-header">
+            <div class="profile-info">
+                <div class="avatar">S</div>
+                <div class="user-details">
+                    <h2><span th:text="${customerName}">Samuel J</span></h2>
+                    <p>Email: <span th:text="${customerEmail}">samueljohn@gmail.com</span></p>
+                </div>
+            </div>
+            <div class="kyc-badge">KYC Verified</div>
+        </div>
+
+        <!-- Skeleton Loading -->
+        <div th:replace="fragments/skeleton :: dashboard-skeleton"></div>
+
+        <!-- Stats Cards (Inside Hero) - Hidden initially -->
+        <div class="stats-container" id="actual-stats" style="display: none;">
+            <!-- Card 1 -->
+            <div class="stat-card">
+                <div>
+                    <div class="stat-title">Savings Account</div>
+                    <div class="stat-value">₹30,985</div>
+                </div>
+                <div style="text-align: right;">
+                    <!-- Small icon placeholder if needed -->
+                    <span style="font-size: 1.2rem; color:#aaa;">💳</span>
+                </div>
+                <a href="#" class="stat-link">View Details →</a>
+            </div>
+            <!-- Card 2 -->
+            <div class="stat-card">
+                <div>
+                    <div class="stat-title">Deposit Account</div>
+                    <div class="stat-value">₹30,985</div>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 1.2rem; color:#aaa;">🐷</span>
+                </div>
+                <a href="#" class="stat-link">View Details →</a>
+            </div>
+            <!-- Card 3 -->
+            <div class="stat-card">
+                <div>
+                    <div class="stat-title">Outstanding Loan</div>
+                    <div class="stat-value">₹8,75,000.00</div>
+                    <div style="font-size: 0.7rem; color: #888;">↓ 2.1% from last month</div>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 1.2rem; color:#aaa;">📈</span>
+                </div>
+                <a href="#" class="stat-link">View Details →</a>
+            </div>
+            <!-- Card 4 -->
+            <div class="stat-card">
+                <div>
+                    <div class="stat-title">Rewards Points</div>
+                    <div class="stat-value">12,450</div>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 1.2rem; color:#aaa;">🎁</span>
+                </div>
+                <a href="#" class="stat-link">Redeemable rewards</a>
+            </div>
+        </div>
+
+        <!-- Scroll Indicator (Mobile Only) -->
+        <div class="stats-scroll-indicator">
+            <span class="dot active"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+    </div>
+
+    <!-- Services Section - Hidden initially -->
+    <div class="services-section" id="actual-services" style="display: none;">
+        <div class="services-grid">
+            <!-- Row 1 -->
+            <a th:href="@{/debit-services}" class="service-card">
+                <div class="service-icon" style="background: #FFF3E0;">💳</div>
+                <div class="service-content">
+                    <div class="service-title">Debit Card services</div>
+                    <div class="service-desc">Manage your card settings and transactions.</div>
+                </div>
+            </a>
+            <a href="#" class="service-card">
+                <div class="service-icon" style="background: #E8F5E9;">🏦</div>
+                <div class="service-content">
+                    <div class="service-title">Account Services</div>
+                    <div class="service-desc">View statement and upgrade account</div>
+                </div>
+            </a>
+            <a href="#" class="service-card">
+                <div class="service-icon" style="background: #FCE4EC;">⚠️</div>
+                <div class="service-content">
+                    <div class="service-title">Dispute Management</div>
+                    <div class="service-desc">Register complaints and track status</div>
+                </div>
+            </a>
+
+            <!-- Row 2 -->
+            <a href="#" class="service-card">
+                <div class="service-icon" style="background: #E3F2FD;">👤</div>
+                <div class="service-content">
+                    <div class="service-title">KYC & Profile Update</div>
+                    <div class="service-desc">Update or confirm your kyc details</div>
+                </div>
+            </a>
+            <a href="#" class="service-card">
+                <div class="service-icon" style="background: #F3E5F5;">📄</div>
+                <div class="service-content">
+                    <div class="service-title">15G-15H update</div>
+                    <div class="service-desc">Update your income details and tax information</div>
+                </div>
+            </a>
+            <a href="#" class="service-card">
+                <div class="service-icon" style="background: #FFF9C4;">📝</div>
+                <div class="service-content">
+                    <div class="service-title">Cheque Services</div>
+                    <div class="service-desc">Manage all your cheque-related needs quickly and securely.</div>
+                </div>
+            </a>
+
+            <!-- Row 3 -->
+            <a href="#" class="service-card">
+                <div class="service-icon" style="background: #E0F2F1;">💰</div>
+                <div class="service-content">
+                    <div class="service-title">Deposit Services</div>
+                    <div class="service-desc">Deposit advice and TDS certificates.</div>
+                </div>
+            </a>
+            <a href="#" class="service-card">
+                <div class="service-icon" style="background: #FFEBEE;">📊</div>
+                <div class="service-content">
+                    <div class="service-title">Loan Services</div>
+                    <div class="service-desc">Loan statements and interest certificates.</div>
+                </div>
+            </a>
+            <a href="#" class="service-card">
+                <div class="service-icon" style="background: #F1F8E9;">⚙️</div>
+                <div class="service-content">
+                    <div class="service-title">Other Services</div>
+                    <div class="service-desc">Nominee management and positive pay system.</div>
+                </div>
+            </a>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="dash-footer">
+        <div>© South Indian Bank. All rights reserved.</div>
+        <div>
+            <a href="#">Privacy Policy</a>
+        </div>
+    </footer>
+
+    <div th:replace="fragments/loader :: loader"></div>
+    <script th:replace="fragments/loader :: loader-script"></script>
+    <script th:src="@{/js/pwa-register.js}"></script>
+    <script th:src="@{/js/haptic-feedback.js}"></script>
+
+    <!-- Skeleton Loading Script -->
+    <script>
+        // Simulate loading delay with Global Loader
+        window.addEventListener('DOMContentLoaded', function () {
+            // Force Global Loader to show
+            if (typeof showLoader === 'function') {
+                showLoader();
+            }
+
+            const skeleton = document.getElementById('dashboard-skeleton');
+            const actualStats = document.getElementById('actual-stats');
+            const actualServices = document.getElementById('actual-services');
+
+            // Show loader for 2 seconds (simulating data fetch), then reveal content
+            setTimeout(function () {
+                // Hide Global Loader
+                if (typeof hideLoader === 'function') {
+                    hideLoader();
+                }
+
+                // Hide Skeleton (if we want to skip it entirely or transition)
+                if (skeleton) {
+                    skeleton.classList.add('skeleton-hidden');
+                }
+
+                // Show Actual Content
+                if (actualStats) {
+                    actualStats.style.display = 'grid';
+                    actualStats.style.animation = 'fadeIn 0.5s ease-in';
+                }
+                if (actualServices) {
+                    actualServices.style.display = 'block';
+                    actualServices.style.animation = 'fadeIn 0.5s ease-in';
+                }
+            }, 500); // Reduced to 500ms just to show the nice loader animation briefly
+        });
+
+        // Stats Carousel Scroll Indicator (Mobile)
+        const statsContainer = document.querySelector('.stats-container');
+        const dots = document.querySelectorAll('.stats-scroll-indicator .dot');
+
+        if (statsContainer && dots.length > 0) {
+            statsContainer.addEventListener('scroll', function () {
+                const scrollLeft = statsContainer.scrollLeft;
+                const cardWidth = statsContainer.querySelector('.stat-card').offsetWidth + 15; // card width + gap
+                const activeIndex = Math.round(scrollLeft / cardWidth);
+
+                dots.forEach((dot, index) => {
+                    if (index === activeIndex) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

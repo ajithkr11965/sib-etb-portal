@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#A6192E">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SIB Portal">
+    <link rel="manifest" th:href="@{/manifest.json}">
+    <link rel="icon" type="image/png" sizes="192x192" th:href="@{/images/icons/icon-192x192.png}">
+    <link rel="apple-touch-icon" th:href="@{/images/icons/icon-192x192.png}">
+    <title>SIB Portal - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/responsive.css}">
+    <link rel="stylesheet" th:href="@{/css/skeleton.css}">
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="left-panel">
+            <!-- Hero Image Container -->
+            <div
+                style="width: 350px; height: 350px; background: #DAEBF5; border-radius: 50%; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; position: relative;">
+                <img th:src="@{/images/hero.png}" alt="SIB Hero" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+
+            <div class="feature-card card-1">
+                <div style="background:#E1BEE7; padding:8px; border-radius:50%">💰</div>
+                <div>
+                    <strong>Quick FD</strong><br>
+                    <small>Attractive rates</small>
+                </div>
+            </div>
+
+            <div class="feature-card card-2">
+                <div style="background:#C8E6C9; padding:8px; border-radius:50%">👤</div>
+                <div>
+                    <strong>Open Account</strong><br>
+                    <small>Video KYC</small>
+                </div>
+            </div>
+
+            <div class="feature-card card-3">
+                <div style="background:#FFCCBC; padding:8px; border-radius:50%">💳</div>
+                <div>
+                    <strong>One Card</strong><br>
+                    <small>Multi-purpose</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div style="margin-bottom: 20px;">
+                <img th:src="@{/images/logo.png}" alt="South Indian Bank" style="height: 60px; width: auto;">
+            </div>
+            <h2>Welcome to SIB Portal</h2>
+            <p class="subtitle">Please enter your details to access the SIB Portal</p>
+
+            <form th:action="@{/continue-to-otp}" th:object="${loginRequest}" method="post">
+
+                <div class="form-group">
+                    <label>Mobile Number*</label>
+                    <div
+                        style="display:flex; align-items:center; border: 1px solid #ddd; border-radius:8px; overflow:hidden;">
+                        <span style="padding: 10px; background:#f9f9f9; border-right:1px solid #ddd;">🇮🇳</span>
+                        <input type="text" th:field="*{mobileNumber}" placeholder="Enter 10-digit mobile number"
+                            style="border:none; border-radius:0;">
+                    </div>
+                    <div th:if="${#fields.hasErrors('mobileNumber')}" th:errors="*{mobileNumber}" class="error-message">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Captcha Verification</label>
+                    <div class="captcha-group">
+                        <input type="text" th:field="*{captcha}" placeholder="Enter captcha">
+                        <div class="captcha-display" th:text="${captchaText}">AB123</div>
+                        <button type="button" class="refresh-btn" onclick="location.reload()">↻</button>
+                    </div>
+                    <div th:if="${#fields.hasErrors('captcha')}" th:errors="*{captcha}" class="error-message"></div>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" th:field="*{agreeToTerms}" id="terms">
+                    <label for="terms" style="display:inline; color: #666; font-weight:400;">
+                        I agree to the Terms of Service and Global Privacy Policy.
+                    </label>
+                </div>
+                <div th:if="${#fields.hasErrors('agreeToTerms')}" th:errors="*{agreeToTerms}" class="error-message"
+                    style="margin-bottom:20px;"></div>
+
+                <button type="submit" class="btn-primary">Continue to OTP</button>
+            </form>
+        </div>
+    </div>
+
+    <div th:replace="fragments/loader :: loader"></div>
+    <script th:replace="fragments/loader :: loader-script"></script>
+    <script th:src="@{/js/pwa-register.js}"></script>
+    <script th:src="@{/js/haptic-feedback.js}"></script>
+</body>
+
+</html>

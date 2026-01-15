@@ -1,0 +1,381 @@
+/* ========================================
+   MOBILE RESPONSIVE DESIGN
+   ======================================== */
+
+/* Tablet Breakpoint (769px - 1024px) */
+@media (max-width: 1024px) {
+
+    /* Dashboard Stats: 4-col → 2-col */
+    .stats-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    /* Services Grid: 3-col → 2-col */
+    .services-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Reduce padding */
+    .hero-profile,
+    .services-section,
+    .dash-nav {
+        padding-left: 30px;
+        padding-right: 30px;
+    }
+}
+
+/* Mobile Breakpoint (≤768px) */
+@media (max-width: 768px) {
+
+    /* ===== AUTH PAGES (Login/OTP) ===== */
+    .container {
+        flex-direction: column;
+        width: 100%;
+        height: auto;
+        min-height: 100vh;
+        margin: 0;
+        border-radius: 0;
+    }
+
+    .left-panel {
+        padding: 30px 20px;
+        min-height: 200px;
+    }
+
+    /* Hide decorative feature cards on mobile */
+    .feature-card {
+        display: none;
+    }
+
+    /* Adjust hero image size */
+    .left-panel>div[style*="width: 350px"] {
+        width: 200px !important;
+        height: 200px !important;
+    }
+
+    .right-panel {
+        padding: 30px 20px;
+    }
+
+    .right-panel h2 {
+        font-size: 1.5rem;
+    }
+
+    .right-panel .subtitle {
+        font-size: 0.9rem;
+    }
+
+    /* OTP Inputs */
+    .otp-inputs input {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+
+    /* Captcha Group */
+    .captcha-group {
+        flex-wrap: wrap;
+    }
+
+    .captcha-display {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+
+    /* ===== DASHBOARD ===== */
+    .dash-nav {
+        padding: 10px 20px;
+        flex-wrap: wrap;
+    }
+
+    .nav-logo {
+        font-size: 1rem;
+    }
+
+    .nav-logo img {
+        height: 40px !important;
+    }
+
+    .nav-search {
+        order: 3;
+        width: 100%;
+        margin: 10px 0 0 0;
+        max-width: 100%;
+    }
+
+    .nav-icons {
+        font-size: 1rem;
+    }
+
+    /* Hero Profile Section */
+    .hero-profile {
+        padding: 30px 20px 60px 20px;
+    }
+
+    .profile-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .profile-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .avatar {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+
+    .user-details h2 {
+        font-size: 1.3rem;
+    }
+
+    .user-details p {
+        font-size: 0.85rem;
+    }
+
+    .kyc-badge {
+        padding: 4px 12px;
+        font-size: 0.75rem;
+    }
+
+    /* Stats: Horizontal Swipeable Carousel on Mobile */
+    .stats-container {
+        display: flex !important;
+        /* Override grid layout */
+        grid-template-columns: unset !important;
+        /* Remove grid */
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 15px;
+        padding-bottom: 10px;
+        padding-left: 20px;
+        padding-right: 20px;
+        /* Hide scrollbar but keep functionality */
+        scrollbar-width: none;
+        /* Firefox */
+        -ms-overflow-style: none;
+        /* IE/Edge */
+    }
+
+    .stats-container::-webkit-scrollbar {
+        display: none;
+        /* Chrome/Safari */
+    }
+
+    .stat-card {
+        flex: 0 0 calc(100% - 40px);
+        /* Full width minus container padding */
+        scroll-snap-align: center;
+        padding: 20px;
+        min-height: 120px;
+    }
+
+    .stat-value {
+        font-size: 1.3rem;
+    }
+
+    /* Scroll Indicator Dots */
+    .stats-scroll-indicator {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 10px;
+    }
+
+    .stats-scroll-indicator .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.4);
+        transition: all 0.3s;
+    }
+
+    .stats-scroll-indicator .dot.active {
+        width: 20px;
+        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Services Section */
+    .services-section {
+        padding: 0 20px 30px 20px;
+        margin-top: 30px;
+    }
+
+    .services-section h3 {
+        font-size: 1.1rem;
+    }
+
+    /* Services Grid: 1-col */
+    .services-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .service-card {
+        padding: 20px;
+        flex-direction: column;
+        /* Icon on top, content below */
+        align-items: center;
+        text-align: center;
+    }
+
+    .service-icon {
+        width: 52px;
+        height: 52px;
+        font-size: 26px;
+    }
+
+    .service-content {
+        align-items: center;
+    }
+
+    .service-title {
+        font-size: 0.95rem;
+    }
+
+    .service-desc {
+        font-size: 0.825rem;
+        line-height: 1.4;
+    }
+
+    /* Footer */
+    .dash-footer {
+        padding: 12px 20px;
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+        font-size: 0.75rem;
+    }
+
+    /* ===== DEBIT SERVICES & CARD REQUEST PAGES ===== */
+    .card-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 15px;
+    }
+
+    .card-preview {
+        width: 100%;
+        height: 60px;
+    }
+
+    .action-item {
+        font-size: 0.9rem;
+    }
+
+    /* Card Variant Options */
+    .card-variant-option {
+        padding: 15px;
+    }
+
+    .address-option {
+        padding: 15px;
+    }
+
+    /* Touch-friendly buttons */
+    .btn-primary,
+    .btn-dark {
+        min-height: 44px;
+        font-size: 1rem;
+    }
+
+    /* ===== LOADER (Mobile) ===== */
+    .loader-container {
+        width: 100px;
+        height: 100px;
+    }
+
+    .loader-progress-ring {
+        width: 100px;
+        height: 100px;
+    }
+
+    .loader-progress-ring circle {
+        r: 45;
+    }
+
+    .coin {
+        width: 28px;
+        height: 28px;
+        font-size: 0.9rem;
+    }
+
+    .loader-text {
+        font-size: 1.1rem;
+    }
+
+    .loader-subtext {
+        font-size: 0.8rem;
+    }
+
+    /* ===== GENERAL MOBILE ADJUSTMENTS ===== */
+    body {
+        font-size: 14px;
+    }
+
+    h2 {
+        font-size: 1.3rem;
+    }
+
+    h3 {
+        font-size: 1.1rem;
+    }
+
+    /* Form inputs */
+    input[type="text"],
+    input[type="tel"] {
+        font-size: 16px;
+        /* Prevents zoom on iOS */
+    }
+
+    /* Ensure images don't overflow */
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+}
+
+/* Small Mobile (≤480px) */
+@media (max-width: 480px) {
+    .right-panel {
+        padding: 20px 15px;
+    }
+
+    .hero-profile {
+        padding: 20px 15px 50px 15px;
+    }
+
+    .services-section {
+        padding: 0 15px 20px 15px;
+    }
+
+    .otp-inputs {
+        gap: 6px;
+    }
+
+    .otp-inputs input {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+    }
+
+    .loader-text {
+        font-size: 1rem;
+    }
+
+    .coin {
+        width: 24px;
+        height: 24px;
+        font-size: 0.8rem;
+    }
+}

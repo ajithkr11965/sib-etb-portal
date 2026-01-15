@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#A6192E">
+    <title>SIB Portal - Digital Banking Toolkit</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css?v=2}">
+    <style>
+        body {
+            background-color: #FFFFFF;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Landing Navbar -->
+    <nav class="landing-nav">
+        <div class="nav-logo">
+            <img th:src="@{/images/logo.png}" alt="South Indian Bank" style="height: 48px;">
+        </div>
+        <div class="nav-actions">
+            <!-- Search Icon -->
+            <button class="icon-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </button>
+            <!-- Bell Icon -->
+            <button class="icon-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+            </button>
+            <a th:href="@{/login}" class="btn-login">Login</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="landing-hero">
+        <p class="hero-subtitle">Digital Products</p>
+        <h1 class="hero-title">Your Digital Banking Toolkit</h1>
+        <p class="hero-desc">Comprehensive digital solutions designed for your financial growth.</p>
+    </header>
+
+    <!-- Content Container -->
+    <main class="landing-container">
+        <!-- Services Grid -->
+        <div class="landing-grid">
+
+            <!-- Card 1: Quick FD -->
+            <div class="landing-card">
+                <div class="card-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                        <path d="M12 11h.01"></path>
+                    </svg>
+                </div>
+                <h3 class="card-title">SIB Quick FD</h3>
+                <p class="card-desc">Open an online fixed deposit in 5 minutes.</p>
+                <a href="#" class="card-link">View More ↗</a>
+            </div>
+
+            <!-- Card 2: Quick Services -->
+            <div class="landing-card">
+                <div class="card-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+                    </svg>
+                </div>
+                <h3 class="card-title">Quick Services</h3>
+                <p class="card-desc">Access essential banking services quickly without visiting a branch.</p>
+                <a href="#" class="card-link">View More ↗</a>
+            </div>
+
+            <!-- Card 3: Loan Against MF -->
+            <div class="landing-card">
+                <div class="card-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v5"></path>
+                        <path d="M3 12l9 4 9-4"></path>
+                        <path d="M12 16v5"></path>
+                        <path d="M7 21h10"></path>
+                    </svg>
+                </div>
+                <h3 class="card-title">Digital Loan Against Mutual Funds</h3>
+                <p class="card-desc">Instant Secured Loan against the mutual fund units you hold.</p>
+                <a href="#" class="card-link">View More ↗</a>
+            </div>
+
+            <!-- Card 4: Savings Account -->
+            <div class="landing-card">
+                <div class="card-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                        <line x1="1" y1="10" x2="23" y2="10"></line>
+                    </svg>
+                </div>
+                <h3 class="card-title">Savings Account</h3>
+                <p class="card-desc">Start your banking journey with a secure and feature rich savings account.</p>
+                <a href="#" class="card-link">View More ↗</a>
+            </div>
+
+            <!-- Card 5: Quick PL -->
+            <div class="landing-card">
+                <div class="card-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                        <line x1="2" y1="10" x2="22" y2="10"></line>
+                        <line x1="12" y1="15" x2="12" y2="15"></line>
+                    </svg>
+                </div>
+                <h3 class="card-title">SIB Quick PL</h3>
+                <p class="card-desc">Avail a personal loan in 10 minutes.</p>
+                <a href="#" class="card-link">View More ↗</a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Global Loader -->
+    <div th:replace="fragments/loader :: loader"></div>
+    <script th:replace="fragments/loader :: loader-script"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIB Portal - Address Selection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/responsive.css}">
+</head>
+
+<body style="display: flex; flex-direction: column; min-height: 100vh; background-color: #F9FAFB;">
+
+    <!-- Navbar -->
+    <nav class="dash-nav">
+        <div class="nav-logo">
+            <img th:src="@{/images/logo.png}" alt="South Indian Bank" style="height: 50px; width: auto;">
+        </div>
+        <div class="nav-search">
+            <input type="text" placeholder="Search here">
+        </div>
+        <div class="nav-icons" style="display: flex; align-items: center; gap: 20px;">
+            <span>🔔</span>
+            <div style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 500;">
+                <div class="avatar" style="width: 32px; height: 32px; font-size: 0.8rem; background: #DAEBF5;">
+                    <img th:src="@{/images/hero.png}"
+                        style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                </div>
+                <span>samueljohn@gmail.com</span>
+                <span>▼</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Breadcrumb -->
+    <div style="padding: 20px 60px; font-size: 0.85rem; color: #666;">
+        Home > ... > Debit Cards
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content"
+        style="padding: 0 60px 60px 60px; display: flex; flex-direction: column; align-items: center;">
+
+        <div style="width: 100%; max-width: 600px; margin-bottom: 20px;">
+            <a th:href="@{/card-request}"
+                style="text-decoration: none; color: #333; font-weight: 700; font-size: 1.1rem;">&lt; Back</a>
+        </div>
+
+        <div
+            style="background: white; padding: 40px; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); width: 100%; max-width: 600px;">
+
+            <h2 style="margin: 0; font-size: 1.3rem; margin-bottom: 5px;">Delivery address</h2>
+            <p style="margin: 0; color: #888; font-size: 0.9rem; margin-bottom: 30px;">Where should we deliver your new
+                card?</p>
+
+            <!-- Address Options -->
+            <label class="address-option selected" onclick="selectAddress(this)">
+                <div style="display: flex; align-items: flex-start; gap: 15px;">
+                    <input type="radio" name="address" checked style="margin-top: 5px;">
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 3px;">Permanent Address</div>
+                        <div style="color: #666; font-size: 0.9rem;">123 Main Street, Banglore, KA 560001</div>
+                    </div>
+                </div>
+            </label>
+
+            <label class="address-option" onclick="selectAddress(this)">
+                <div style="display: flex; align-items: flex-start; gap: 15px;">
+                    <input type="radio" name="address" style="margin-top: 5px;">
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 3px;">Communication Address</div>
+                        <div style="color: #666; font-size: 0.9rem;">456 work Avenue, Banglore, KA 560034</div>
+                    </div>
+                </div>
+            </label>
+
+            <a th:href="@{/card-request-review}">
+                <button class="btn-dark" style="margin-top: 20px;">Review Changes</button>
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="dash-footer">
+        <div>© South Indian Bank. All rights reserved.</div>
+        <div>
+            <a href="#">Privacy Policy</a>
+        </div>
+    </footer>
+
+    <script>
+        function selectAddress(element) {
+            document.querySelectorAll('.address-option').forEach(el => {
+                el.classList.remove('selected');
+                el.querySelector('input').checked = false;
+            });
+            element.classList.add('selected');
+            element.querySelector('input').checked = true;
+        }
+    </script>
+
+    <div th:replace="fragments/loader :: loader"></div>
+    <script th:replace="fragments/loader :: loader-script"></script>
+</body>
+
+</html>

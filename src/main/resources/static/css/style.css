@@ -1,0 +1,908 @@
+:root {
+    --primary-color: #D32F2F;
+    --sib-red: #A6192E;
+    /* Deeper red from screenshot */
+    --bg-light: #F9FAFB;
+    --text-dark: #333;
+    --text-muted: #666;
+    --white: #FFFFFF;
+    --border-color: #E5E7EB;
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+}
+
+/* Auth Pages Layout (Login/OTP) - Keep existing styles focused */
+.container {
+    display: flex;
+    width: 90%;
+    max-width: 1200px;
+    height: 90vh;
+    background: var(--white);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 5vh auto;
+    /* Center vertically */
+}
+
+.left-panel {
+    flex: 1;
+    background: #E3F2FD;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: 40px;
+}
+
+.right-panel {
+    flex: 1;
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: var(--white);
+}
+
+/* Feature Cards & Other Auth Styles */
+.feature-card {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: absolute;
+    width: 200px;
+}
+
+.card-1 {
+    top: 20%;
+    right: 10%;
+}
+
+.card-2 {
+    bottom: 30%;
+    left: 10%;
+}
+
+.card-3 {
+    bottom: 10%;
+    right: 20%;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+input[type="text"],
+input[type="tel"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 15px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: #B71C1C;
+}
+
+.otp-inputs {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.otp-inputs input {
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+.captcha-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.captcha-display {
+    background: #f0f0f0;
+    padding: 10px 20px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    border-radius: 6px;
+}
+
+.refresh-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.checkbox-group {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 30px;
+}
+
+.error-message {
+    color: #D32F2F;
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+
+/* --- DASHBOARD STYLES --- */
+
+/* Navbar */
+.dash-nav {
+    background: var(--white);
+    padding: 15px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.nav-logo {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #D32F2F;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.nav-search {
+    flex: 1;
+    max-width: 500px;
+    margin: 0 20px;
+    position: relative;
+}
+
+.nav-search input {
+    width: 100%;
+    padding: 10px 40px 10px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    background: var(--white);
+    font-size: 0.9rem;
+}
+
+.nav-icons {
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--text-dark);
+}
+
+/* Hero Profile Section */
+.hero-profile {
+    background-color: var(--sib-red);
+    color: white;
+    padding: 40px 60px 80px 60px;
+    /* Increased bottom padding for better containment */
+}
+
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.profile-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.avatar {
+    width: 60px;
+    height: 60px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sib-red);
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.user-details h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.user-details p {
+    margin: 0;
+    opacity: 0.8;
+    font-size: 0.9rem;
+}
+
+.kyc-badge {
+    background: white;
+    color: var(--sib-red);
+    padding: 5px 15px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* Stats Cards */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    /* Removed padding/margins as it is now inside the padded hero section */
+}
+
+.stat-card {
+    background: #F3F1F1;
+    /* Light gray from screenshot */
+    border-radius: 8px;
+    padding: 20px;
+    color: var(--text-dark);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 120px;
+}
+
+.stat-title {
+    font-size: 0.85rem;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.stat-link {
+    font-size: 0.8rem;
+    color: #555;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Services Grid */
+.services-section {
+    padding: 0 60px 40px 60px;
+    margin-top: 40px;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+/* Service Cards - Minimal Elegant Design */
+.service-card {
+    background: var(--white);
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid #F0F0F0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.service-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 0;
+    background: linear-gradient(180deg, var(--sib-red), #FF6B6B);
+    transition: height 0.3s ease;
+}
+
+.service-card:hover {
+    border-color: #E0E0E0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.service-card:hover::before {
+    height: 100%;
+}
+
+.service-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.service-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.service-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1A1A1A;
+    letter-spacing: -0.01em;
+}
+
+.service-desc {
+    font-size: 0.875rem;
+    color: #666;
+    line-height: 1.5;
+}
+
+/* Footer */
+.dash-footer {
+    background: var(--sib-red);
+    color: white;
+    padding: 15px 60px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    margin-top: auto;
+}
+
+.dash-footer a {
+    color: white;
+    text-decoration: none;
+}
+
+/* --- DEBIT CARD PAGE STYLES --- */
+.card-item {
+    background: #EBEBEB;
+    border-radius: 8px;
+    padding: 15px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.card-preview {
+    width: 80px;
+    height: 50px;
+    background: #555;
+    border-radius: 6px;
+    color: white;
+    padding: 5px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.action-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.action-icon {
+    width: 24px;
+    height: 24px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+/* --- CARD REQUEST PAGE STYLES --- */
+.card-variant-option {
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.card-variant-option:hover {
+    border-color: #999;
+}
+
+.btn-dark {
+    width: 100%;
+    padding: 15px;
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.btn-dark:hover {
+    background: #111;
+}
+
+/* --- ADDRESS SELECTION PAGE STYLES --- */
+.address-option {
+    display: block;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.address-option.selected {
+    border: 1px solid #ddd;
+    /* Added box shadow to simulate selected state focus if needed, or keeping it subtle as per screenshot */
+}
+
+/* Per screenshot, input radio alignment */
+input[type="radio"] {
+    accent-color: #333;
+    transform: scale(1.2);
+}
+
+/* --- GLOBAL PAGE LOADER (Modern Professional Banking Theme) --- */
+#global-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(166, 25, 46, 0.05) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(166, 25, 46, 0.05) 100%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 9999;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Container for logo and dots */
+.loader-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+/* Logo Styling (SVG Vector Animation) */
+.loader-brand-symbol {
+    width: 140px;
+    height: auto;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+.loader-brand-symbol svg {
+    width: 100%;
+    height: auto;
+    fill: #ce171e;
+    /* SIB Red */
+    filter: drop-shadow(0 4px 6px rgba(206, 23, 30, 0.2));
+    overflow: visible;
+    /* Ensure extra breathing room */
+}
+
+.sib-strip {
+    /* Origin center for scaling from middle or left depending on effect desired */
+    transform-origin: center center;
+    animation: strip-breathe 2.5s ease-in-out infinite;
+    opacity: 0.85;
+}
+
+/* Staggered Animation for "Living" Wave Effect */
+.sib-strip:nth-child(1) {
+    animation-delay: 0.0s;
+}
+
+.sib-strip:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.sib-strip:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.sib-strip:nth-child(4) {
+    animation-delay: 0.3s;
+}
+
+.sib-strip:nth-child(5) {
+    animation-delay: 0.4s;
+}
+
+.sib-strip:nth-child(6) {
+    animation-delay: 0.5s;
+}
+
+.sib-strip:nth-child(7) {
+    animation-delay: 0.6s;
+}
+
+.sib-strip:nth-child(8) {
+    animation-delay: 0.7s;
+}
+
+.sib-strip:nth-child(9) {
+    animation-delay: 0.8s;
+}
+
+.sib-strip:nth-child(10) {
+    animation-delay: 0.9s;
+}
+
+/* 3-Dot Indicator (retained) */
+.loader-dots {
+    display: flex;
+    gap: 8px;
+    margin-top: -10px;
+    /* Slight adjustment for visual balance */
+}
+
+.loader-dots span {
+    width: 8px;
+    height: 8px;
+    background-color: #ce171e;
+    border-radius: 50%;
+    display: inline-block;
+    animation: dot-bounce 1.4s infinite ease-in-out both;
+}
+
+.loader-dots span:nth-child(1) {
+    animation-delay: -0.32s;
+    background-color: #ce171e;
+}
+
+.loader-dots span:nth-child(2) {
+    animation-delay: -0.16s;
+    background-color: #a61218;
+    /* Darker shade */
+}
+
+.loader-dots span:nth-child(3) {
+    background-color: #D32F2F;
+}
+
+/* Keyframes */
+@keyframes strip-breathe {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.85;
+    }
+
+    50% {
+        transform: scale(1.08);
+        opacity: 1;
+        fill: #ff2b34;
+        /* Subtle brighten on pulse */
+    }
+}
+
+@keyframes dot-bounce {
+
+    0%,
+    80%,
+    100% {
+        transform: scale(0);
+        opacity: 0.5;
+    }
+
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse-text {
+
+    0%,
+    100% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.02);
+    }
+}
+
+/* Fade in/out classes */
+.fade-in {
+    opacity: 1;
+    transition: opacity 0.4s ease-in;
+}
+
+.fade-out {
+    opacity: 0;
+    transition: opacity 0.4s ease-out;
+}
+
+/* --- LANDING PAGE STYLES --- */
+
+/* Landing Navbar */
+.landing-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 60px;
+    background: white;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #4B5563;
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.icon-btn:hover {
+    background: #F3F4F6;
+}
+
+.btn-login {
+    background-color: #000;
+    color: white;
+    padding: 10px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: background-color 0.2s;
+}
+
+.btn-login:hover {
+    background-color: #333;
+}
+
+/* Landing Hero */
+.landing-hero {
+    text-align: center;
+    padding: 80px 20px 40px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.hero-subtitle {
+    color: #6B7280;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 400;
+    /* As per design, thin elegant font */
+    color: #111827;
+    margin: 0 0 16px 0;
+    line-height: 1.2;
+}
+
+.hero-desc {
+    color: #4B5563;
+    font-size: 1.1rem;
+    max-width: 500px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+
+/* Landing Grid */
+.landing-container {
+    max-width: 1400px;
+    /* Wider container for 5 cards */
+    margin: 0 auto;
+    padding: 40px 60px 100px;
+    overflow-x: auto;
+    /* Allow scroll if needed on smaller screens */
+}
+
+.landing-grid {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+/* Landing Cards */
+.landing-card {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    width: 200px;
+    /* Fixed width as per design grid */
+    min-height: 280px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid #F3F4F6;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: left;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.landing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.card-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    margin-bottom: 20px;
+    color: #111;
+}
+
+.loader-text {
+    font-family: 'Inter', sans-serif;
+    color: #111827;
+    /* Dark Gray/Black */
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    margin-top: 10px;
+    animation: pulse-text 2s infinite ease-in-out;
+}
+
+/* Subtext removed as per request */
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #111;
+    margin: 0 0 12px 0;
+    line-height: 1.3;
+}
+
+.card-desc {
+    font-size: 0.9rem;
+    color: #4B5563;
+    line-height: 1.5;
+    margin: 0 0 24px 0;
+    flex-grow: 1;
+}
+
+.card-link {
+    font-size: 0.85rem;
+    color: #4B5563;
+    text-decoration: none;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.card-link:hover {
+    color: #000;
+}
+
+@media (max-width: 768px) {
+    .landing-nav {
+        padding: 15px 20px;
+    }
+
+    .nav-actions .icon-btn {
+        display: none;
+        /* Hide icons on mobile to save space, keep login */
+    }
+
+    .landing-hero {
+        padding: 40px 20px;
+    }
+
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .landing-container {
+        padding: 0 0 40px 0;
+        /* Remove side padding to allow full bleed scroll */
+        max-width: 100%;
+    }
+
+    .landing-grid {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        justify-content: flex-start;
+        gap: 16px;
+        padding: 0 20px 20px 20px;
+        /* Add padding to container for scroll limits */
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        /* Hide scrollbar for cleaner look */
+    }
+
+    .landing-grid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .landing-card {
+        min-width: 260px;
+        /* Fixed width for cards */
+        width: 260px;
+        scroll-snap-align: center;
+        margin-right: 0;
+        flex-shrink: 0;
+    }
+}

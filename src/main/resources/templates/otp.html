@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIB Portal - OTP Verification</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/responsive.css}">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <script>
+        function focusNext(ele) {
+            if (ele.value.length === 1) {
+                const next = ele.nextElementSibling;
+                if (next) next.focus();
+            }
+        }
+
+        function combineOtp() {
+            let otp = "";
+            document.querySelectorAll('.otp-inputs input').forEach(box => otp += box.value);
+            document.getElementById('otp').value = otp;
+            return true;
+        }
+
+        // Timer Logic
+        let timeLeft = 60; // 60 seconds
+        function startTimer() {
+            const timerElem = document.getElementById('timer-text');
+            const resendBtn = document.getElementById('resend-btn');
+
+            const interval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    timerElem.innerText = "";
+                    resendBtn.classList.remove('disabled');
+                    resendBtn.innerText = "Resend OTP";
+                } else {
+                    timerElem.innerText = "Resend in OTP " + timeLeft + "s";
+                    timeLeft--;
+                }
+            }, 1000);
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Auto-focus first OTP input
+            const firstOtp = document.getElementById('otp1');
+            if (firstOtp) firstOtp.focus();
+
+            startTimer(); // Start timer on page load
+
+            // Auto-tab between OTP inputs
+            const otpInputs = document.querySelectorAll('.otp-inputs input');
+            otpInputs.forEach((input, index) => {
+                input.addEventListener('input', function () {
+                    if (this.value.length === 1 && index < otpInputs.length - 1) {
+                        otpInputs[index + 1].focus();
+                    }
+                });
+
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === 'Backspace' && this.value === '' && index > 0) {
+                        otpInputs[index - 1].focus();
+                    }
+                });
+            });
+        });
+
+        // WebOTP API - Auto-fill OTP from SMS
+        if ('OTPCredential' in window) {
+            const ac = new AbortController();
+
+            navigator.credentials.get({
+                otp: { transport: ['sms'] },
+                signal: ac.signal
+            }).then(otp => {
+                if (otp && otp.code) {
+                    console.log('OTP received from SMS:', otp.code);
+                    // Fill OTP inputs
+                    const otpCode = otp.code;
+                    otpInputs.forEach((input, i) => {
+                        if (otpCode[i]) {
+                            input.value = otpCode[i];
+                        }
+                    });
+                    // Focus last input
+                    otpInputs[otpInputs.length - 1].focus();
+                    // Trigger haptic feedback
+                    if (typeof HapticFeedback !== 'undefined') {
+                        HapticFeedback.success();
+                    }
+                }
+            }).catch(err => {
+                console.log('WebOTP error:', err);
+                ac.abort();
+            });
+
+            // Abort WebOTP request on form submit
+            document.querySelector('form').addEventListener('submit', () => {
+                ac.abort();
+            });
+        }
+
+        // Resend OTP function
+        function resendOtp() {
+            const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+            const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+            fetch('/resend-otp', {
+                method: 'POST',
+                headers: {
+                    [header]: token
+                }
+            })
+                .then(response => response.text())
+                .then(data => {
+                    alert(data);
+                    timeLeft = 60;
+                    document.getElementById('resend-btn').classList.add('disabled');
+                    startTimer();
+                });
+        }
+    </script>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="left-panel">
+            <!-- Reuse same left panel or simplified one -->
+            <div
+                style="width: 350px; height: 350px; background: #DAEBF5; border-radius: 50%; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; position: relative;">
+                <img th:src="@{/images/hero.png}" alt="SIB Hero" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <div class="feature-card card-1">
+                <div style="background:#E1BEE7; padding:8px; border-radius:50%">💰</div>
+                <div><strong>Quick FD</strong><br><small>Attractive rates</small></div>
+            </div>
+        </div>
+
+        <div class="right-panel" style="align-items: center; text-align: center;">
+            <div style="background:#FFEBEE; padding:20px; border-radius:50%; margin-bottom:20px;">
+                📱
+            </div>
+            <h2>Enter the OTP</h2>
+            <p class="subtitle">Enter the 6 digit code we just sent to <br><b th:text="${mobile}">XXXXXXXX123</b></p>
+
+            <form th:action="@{/validate-otp}" th:object="${otpRequest}" method="post" onsubmit="combineOtp()"
+                style="width: 100%; max-width: 400px;">
+
+                <div class="form-group">
+                    <label style="text-align: left;">Enter OTP</label>
+                    <div class="otp-inputs">
+                        <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric"
+                            autocomplete="one-time-code" id="otp1" required>
+                        <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" id="otp2" required>
+                        <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" id="otp3" required>
+                        <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" id="otp4" required>
+                        <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" id="otp5" required>
+                        <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" id="otp6" required>
+                    </div>
+                    <!-- Hidden input to store full OTP -->
+                    <input type="hidden" th:field="*{otp}" id="otp">
+                    <div th:if="${#fields.hasErrors('otp')}" th:errors="*{otp}" class="error-message"></div>
+                </div>
+
+                <div class="timer">
+                    <span id="timer-text">Resend in OTP 60s</span>
+                    <a id="resend-btn" class="resend-link disabled" onclick="resendOtp()">Resend OTP</a>
+                </div>
+
+                <button type="submit" class="btn-primary">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <div th:replace="fragments/loader :: loader"></div>
+    <script th:replace="fragments/loader :: loader-script"></script>
+    <script th:src="@{/js/haptic-feedback.js}"></script>
+</body>
+
+</html>
