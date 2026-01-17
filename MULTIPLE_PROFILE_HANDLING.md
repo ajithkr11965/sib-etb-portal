@@ -14,33 +14,35 @@ When `custDetails[]` contains multiple records, we need to let the user select w
 
 ### Current Flow (Single Profile)
 ```
-User Login → Captcha → API Call → OTP → Dashboard
+User Login → Captcha → API Call → OTP → Validate OTP → Dashboard
                                     ↓
                           (Uses first custDetails[0])
 ```
 
-### Proposed Flow (Multiple Profiles)
+### Proposed Flow (Multiple Profiles) - CORRECTED
 ```
-User Login → Captcha → API Call → Check custDetails.length
-                                           ↓
-                          ┌────────────────┴────────────────┐
-                          ↓                                 ↓
-                    Single Profile                   Multiple Profiles
-                          ↓                                 ↓
-                        OTP                         Profile Selection Page
-                          ↓                                 ↓
-                      Dashboard                           OTP
-                                                            ↓
-                                                        Dashboard
+User Login → Captcha → API Call → OTP → Validate OTP → Check custDetails.length
+                                                                 ↓
+                                                ┌────────────────┴────────────────┐
+                                                ↓                                 ↓
+                                          Single Profile                   Multiple Profiles
+                                                ↓                                 ↓
+                                            Dashboard                    Profile Selection Page
+                                                                                  ↓
+                                                                              Dashboard
 ```
+
+### Key Point
+**OTP is sent IMMEDIATELY after API validates phone number, regardless of profile count.**
+Profile selection happens AFTER OTP validation, not before.
 
 ## Implementation Plan
 
 ### Phase 1: Detection & Storage
 
-**1.1 Update AuthController.java**
+**1.1 Update AuthController.java - continueToOtp() method**
 ```java
-// After API call, check for multiple profiles
+// After API call - ALWAYS generate OTP regardless of profile count
 CustomerRegistrationResponse registrationResponse =
     customerIntegrationService.getCustomerRegistrationDetails(mobileNumber);
 
@@ -51,19 +53,81 @@ List<CustomerDetails> custDetails = registrationResponse.getResponse()
 session.setAttribute("CUSTOMER_REGISTRATION_DATA", registrationResponse);
 session.setAttribute("CUSTOMER_COUNT", custDetails.size());
 
-// Check if multiple profiles exist
-if (custDetails.size() > 1) {
-    // Multiple profiles - redirect to profile selection
-    session.setAttribute("PROFILE_SELECTION_REQUIRED", true);
-    return "redirect:/select-profile";
-} else {
-    // Single profile - store and continue to OTP
-    session.setAttribute("SELECTED_PROFILE", custDetails.get(0));
-    session.setAttribute("PROFILE_SELECTION_REQUIRED", false);
-    // Generate OTP
-    String otp = otpService.generateOtp(mobileNumber);
-    // ... existing OTP flow
-    return "redirect:/otp";
+// Log profile count
+logger.info("Found {} customer profile(s) for mobile: XXXXXXX{}",
+    custDetails.size(),
+    mobileNumber.substring(mobileNumber.length() - 4));
+
+// ALWAYS generate OTP - phone validation is the same regardless of profile count
+String otp = otpService.generateOtp(mobileNumber);
+session.setAttribute("SESSION_OTP", otp);
+session.setAttribute("SESSION_MOBILE", mobileNumber);
+session.setAttribute("SESSION_OTP_TIME", LocalDateTime.now());
+session.setAttribute("SESSION_OTP_ATTEMPTS", 0);
+
+// Profile selection will happen AFTER OTP validation
+return "redirect:/otp";
+```
+
+**1.2 Update AuthController.java - validateOtp() method**
+```java
+@PostMapping("/validate-otp")
+public String validateOtp(@Valid @ModelAttribute("otpRequest") OtpRequest otpRequest,
+        BindingResult bindingResult,
+        HttpSession session,
+        Model model) {
+
+    String sessionOtp = (String) session.getAttribute("SESSION_OTP");
+    LocalDateTime generatedTime = (LocalDateTime) session.getAttribute("SESSION_OTP_TIME");
+    String mobile = (String) session.getAttribute("SESSION_MOBILE");
+    Integer attempts = (Integer) session.getAttribute("SESSION_OTP_ATTEMPTS");
+
+    if (mobile == null) {
+        return "redirect:/";
+    }
+
+    // ... existing OTP validation logic ...
+
+    if (!otpService.validateOtp(sessionOtp, otpRequest.getOtp(), generatedTime)) {
+        bindingResult.rejectValue("otp", "error.otp", "Invalid or Expired OTP");
+        model.addAttribute("mobile", maskMobile(mobile));
+        userJourneyLogger.logLoginFailure(mobile, "Invalid OTP");
+        return "otp";
+    }
+
+    // SUCCESS - OTP validated
+    // Set Spring Security Context
+    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+            mobile, otpRequest.getOtp(), Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    userJourneyLogger.logLoginSuccess(mobile);
+
+    // NOW check for multiple profiles
+    Integer customerCount = (Integer) session.getAttribute("CUSTOMER_COUNT");
+
+    if (customerCount != null && customerCount > 1) {
+        // Multiple profiles - redirect to selection page
+        logger.info("Multiple profiles detected, redirecting to profile selection");
+        session.setAttribute("PROFILE_SELECTION_REQUIRED", true);
+        return "redirect:/select-profile";
+    } else {
+        // Single profile - auto-select and go to dashboard
+        CustomerRegistrationResponse customerData =
+            (CustomerRegistrationResponse) session.getAttribute("CUSTOMER_REGISTRATION_DATA");
+
+        if (customerData != null && customerData.getResponse() != null
+                && customerData.getResponse().getBody() != null) {
+            List<CustomerDetails> custDetails = customerData.getResponse().getBody().getCustDetails();
+            if (!custDetails.isEmpty()) {
+                session.setAttribute("SELECTED_PROFILE", custDetails.get(0));
+                session.setAttribute("SELECTED_CIF_ID", custDetails.get(0).getCifID());
+                logger.info("Auto-selected single profile: {}", custDetails.get(0).getCifID());
+            }
+        }
+
+        return "redirect:/dashboard";
+    }
 }
 ```
 
@@ -153,18 +217,14 @@ public String confirmProfile(@Valid @ModelAttribute("selectionRequest") ProfileS
 
     // Store selected profile in session
     session.setAttribute("SELECTED_PROFILE", selectedProfile);
+    session.setAttribute("SELECTED_CIF_ID", selectedProfile.getCifID());
     session.setAttribute("PROFILE_SELECTION_REQUIRED", false);
 
     userJourneyLogger.logTransactionInitiated(mobile,
         "Profile Selected: " + selectedProfile.getCifID());
 
-    // Generate OTP
-    String otp = otpService.generateOtp(mobile);
-    session.setAttribute("SESSION_OTP", otp);
-    session.setAttribute("SESSION_OTP_TIME", LocalDateTime.now());
-    session.setAttribute("SESSION_OTP_ATTEMPTS", 0);
-
-    return "redirect:/otp";
+    // OTP already validated - go directly to dashboard
+    return "redirect:/dashboard";
 }
 ```
 
@@ -326,16 +386,40 @@ public String switchProfile(HttpSession session) {
 
 ## Security Considerations
 
-### 1. Session Validation
+### 1. OTP Before Profile Selection ✅
+```java
+// OTP is ALWAYS sent after API validates phone number
+// Profile selection happens AFTER OTP validation
+// This ensures:
+// 1. Phone number ownership is verified first
+// 2. User is authenticated before seeing customer data
+// 3. Multiple profiles are only shown to authenticated users
+
+// After captcha validation
+String otp = otpService.generateOtp(mobileNumber); // ← ALWAYS send OTP
+
+// After OTP validation
+if (customerCount > 1) {
+    return "redirect:/select-profile"; // ← Show profiles AFTER auth
+}
+```
+
+### 2. Session Validation
 ```java
 // Before showing profile selection page
 Boolean selectionRequired = (Boolean) session.getAttribute("PROFILE_SELECTION_REQUIRED");
 if (selectionRequired == null || !selectionRequired) {
     return "redirect:/login"; // Force re-login
 }
+
+// Also check if user is authenticated
+String mobile = SecurityContextHolder.getContext().getAuthentication().getName();
+if (mobile == null || "anonymousUser".equals(mobile)) {
+    return "redirect:/login"; // Not authenticated
+}
 ```
 
-### 2. CIF ID Validation
+### 3. CIF ID Validation
 ```java
 // When user submits profile selection
 // Ensure selected CIF ID exists in their session data
@@ -352,55 +436,53 @@ if (selectedProfile == null) {
 }
 ```
 
-### 3. OTP After Profile Selection
-```java
-// Important: Generate OTP only AFTER profile selection
-// This ensures user confirms their identity for the specific profile
-if (custDetails.size() > 1) {
-    // Don't generate OTP yet
-    return "redirect:/select-profile";
-} else {
-    // Single profile - generate OTP immediately
-    String otp = otpService.generateOtp(mobileNumber);
-}
-```
-
 ## User Experience Flow
 
-### Scenario 1: Single Profile
+### Scenario 1: Single Profile (Current Flow)
 ```
 Login Page (mobile: 9496807441, captcha: ABC123)
   ↓
-API Call → 1 customer found
+API Call → Validates phone, finds 1 customer
   ↓
 OTP Page (OTP sent to XXXXXXX441)
+  ↓
+User enters OTP and validates
   ↓
 Dashboard (Welcome, GOPIKRISHNAN T M)
 ```
 
-### Scenario 2: Multiple Profiles (Parent & Child)
+### Scenario 2: Multiple Profiles (New Flow)
 ```
 Login Page (mobile: 9496807441, captcha: ABC123)
   ↓
-API Call → 3 customers found
+API Call → Validates phone, finds 3 customers
   ↓
-Profile Selection Page
+OTP Page (OTP sent to XXXXXXX441) ← Same as single profile
+  ↓
+User enters OTP and validates ✅ Authenticated
+  ↓
+Profile Selection Page (NOW show profiles)
   [•] GOPIKRISHNAN T M (CIF: A55835680) - Parent
+      DOB: 14-08-1992, Accounts: 2
   [ ] GOPIKRISHNAN JUNIOR (CIF: A55835681) - Child
+      DOB: 01-05-2015, Accounts: 1
   [ ] GOPIKRISHNA T M (CIF: A55835682) - Spouse
+      DOB: 20-03-1995, Accounts: 1
   ↓
 User selects Parent profile
-  ↓
-OTP Page (OTP sent to XXXXXXX441)
   ↓
 Dashboard (Welcome, GOPIKRISHNAN T M - CIF: A55835680)
 ```
 
-### Scenario 3: Profile Switching
+### Scenario 3: Profile Switching (Requires Re-authentication)
 ```
 Dashboard (Current: GOPIKRISHNAN T M)
   ↓
 Click "Switch Profile"
+  ↓
+Logout and redirect to login
+  ↓
+Login again with OTP
   ↓
 Profile Selection Page
   [ ] GOPIKRISHNAN T M (CIF: A55835680) - Parent
@@ -409,10 +491,10 @@ Profile Selection Page
   ↓
 User selects Child profile
   ↓
-OTP Page (OTP sent to XXXXXXX441)
-  ↓
 Dashboard (Welcome, GOPIKRISHNAN JUNIOR - CIF: A55835681)
 ```
+
+**Note:** Profile switching requires re-authentication (logout + login with OTP) for security.
 
 ## Database Schema (Optional)
 
@@ -515,27 +597,38 @@ LIMIT 1;
 ## Summary
 
 **Key Changes:**
-1. ✅ Detect multiple profiles in API response
-2. ✅ Show profile selection page if multiple found
-3. ✅ Store selected profile in session
-4. ✅ Generate OTP after profile selection
-5. ✅ Use selected profile for all operations
-6. ✅ Allow profile switching with re-authentication
+1. ✅ API call validates phone number and fetches customer data
+2. ✅ OTP sent IMMEDIATELY after API call (regardless of profile count)
+3. ✅ After OTP validation, check for multiple profiles
+4. ✅ Show profile selection page AFTER authentication
+5. ✅ Store selected profile in session
+6. ✅ Use selected profile for all operations
+7. ✅ Profile switching requires re-authentication
+
+**Correct Flow:**
+```
+Login → Captcha → API (validate phone) → OTP → Validate OTP →
+    → Check profiles → [Single: Dashboard] or [Multiple: Select Profile → Dashboard]
+```
 
 **Session Data:**
 - `CUSTOMER_REGISTRATION_DATA`: Full API response
 - `CUSTOMER_COUNT`: Number of profiles
-- `PROFILE_SELECTION_REQUIRED`: Boolean flag
+- `PROFILE_SELECTION_REQUIRED`: Boolean flag (set after OTP validation)
 - `SELECTED_PROFILE`: Currently active profile
 - `SELECTED_CIF_ID`: Quick access to CIF
 
 **Security:**
-- OTP required after profile selection
-- CIF ID validation on selection
-- Session validation on all protected pages
-- Security event logging for suspicious activity
+- ✅ OTP required BEFORE showing profiles (phone ownership verified)
+- ✅ Profiles shown only to authenticated users
+- ✅ CIF ID validation on selection
+- ✅ Session validation on all protected pages
+- ✅ Profile switching requires re-authentication
+- ✅ Security event logging for suspicious activity
 
 This approach ensures:
+- Phone number ownership is verified first (OTP)
+- Customer data is protected (shown only after auth)
 - Users can manage multiple profiles under same mobile
 - Clear selection process with profile details
 - Secure switching between profiles
