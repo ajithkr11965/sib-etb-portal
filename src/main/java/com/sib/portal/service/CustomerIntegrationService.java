@@ -1,28 +1,18 @@
 package com.sib.portal.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sib.portal.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.UUID;
 
 @Service
 public class CustomerIntegrationService {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomerIntegrationService.class);
-    private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
     private final ExternalApiService apiService;
-    private final EncryptionService encryptionService;
-    private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper;
+    private final EncryptedApiService encryptedApiService;
 
     @Value("${step.api.mock.enabled:true}")
     private boolean mockEnabled;
@@ -32,12 +22,6 @@ public class CustomerIntegrationService {
 
     @Value("${api.customer.registration.url}")
     private String registrationUrl;
-
-    @Value("${api.customer.registration.client-id}")
-    private String clientId;
-
-    @Value("${api.customer.registration.client-secret}")
-    private String clientSecret;
 
     @Value("${api.customer.registration.merchant-code}")
     private String merchantCode;
@@ -49,13 +33,9 @@ public class CustomerIntegrationService {
     private String countryCode;
 
     public CustomerIntegrationService(ExternalApiService apiService,
-                                     EncryptionService encryptionService,
-                                     RestTemplate restTemplate,
-                                     ObjectMapper objectMapper) {
+                                     EncryptedApiService encryptedApiService) {
         this.apiService = apiService;
-        this.encryptionService = encryptionService;
-        this.restTemplate = restTemplate;
-        this.objectMapper = objectMapper;
+        this.encryptedApiService = encryptedApiService;
     }
 
     public CustomerProfileResponse getCustomerProfile(String mobileNumber) {
@@ -69,6 +49,7 @@ public class CustomerIntegrationService {
 
     /**
      * Fetch customer registration details from the encrypted API endpoint.
+     * Uses the generic SibEncryptedApiService for encryption/decryption.
      *
      * @param mobileNumber The mobile number to search for
      * @return CustomerRegistrationResponse with customer details
@@ -82,53 +63,10 @@ public class CustomerIntegrationService {
             // Build the request payload
             CustomerRegistrationRequest request = buildRegistrationRequest(mobileNumber);
 
-            // Convert request to JSON string
-            String requestJson = objectMapper.writeValueAsString(request);
-            logger.debug("Request JSON (before encryption): {}", maskSensitiveData(requestJson));
-
-            // Encrypt the request
-            String encryptedRequest = encryptionService.encrypt(requestJson);
-            logger.debug("Encrypted request: {}", encryptedRequest.substring(0, Math.min(50, encryptedRequest.length())) + "...");
-
-            // Wrap in encrypted request object
-            EncryptedRequest encryptedPayload = EncryptedRequest.builder()
-                    .request(encryptedRequest)
-                    .build();
-
-            // Prepare headers
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("SIB-Client-Id", clientId);
-            headers.set("SIB-Client-Secret", clientSecret);
-
-            // Create HTTP entity
-            HttpEntity<EncryptedRequest> entity = new HttpEntity<>(encryptedPayload, headers);
-
-            // Call the API
-            logger.info("Calling customer registration API: {}", registrationUrl);
-            ResponseEntity<EncryptedResponse> response = restTemplate.exchange(
+            // Call the encrypted API using the generic service
+            CustomerRegistrationResponse registrationResponse = encryptedApiService.callEncryptedApi(
                     registrationUrl,
-                    HttpMethod.POST,
-                    entity,
-                    EncryptedResponse.class
-            );
-
-            // Get encrypted response
-            EncryptedResponse encryptedResponse = response.getBody();
-            if (encryptedResponse == null || encryptedResponse.getResponse() == null) {
-                throw new Exception("Empty response received from API");
-            }
-
-            String encryptedResponseStr = encryptedResponse.getResponse();
-            logger.debug("Encrypted response: {}", encryptedResponseStr.substring(0, Math.min(50, encryptedResponseStr.length())) + "...");
-
-            // Decrypt the response
-            String decryptedResponse = encryptionService.decrypt(encryptedResponseStr);
-            logger.debug("Decrypted response: {}", maskSensitiveData(decryptedResponse));
-
-            // Parse the decrypted response
-            CustomerRegistrationResponse registrationResponse = objectMapper.readValue(
-                    decryptedResponse,
+                    request,
                     CustomerRegistrationResponse.class
             );
 
@@ -155,55 +93,69 @@ public class CustomerIntegrationService {
 
     /**
      * Build the customer registration request payload.
+     * Uses the base request builder for common Header structure.
      */
     private CustomerRegistrationRequest buildRegistrationRequest(String mobileNumber) {
-        String timestamp = LocalDateTime.now().format(TIMESTAMP_FORMAT);
-        String uuid = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+        // Generate UUID for this request
+        String uuid = BaseApiRequest.generateRequestUUID();
 
+        // Build standard header using the base builder
+        BaseApiRequest.Header header = BaseApiRequest.HeaderBuilder.buildStandardHeader();
+
+        // Build the body with customer-specific data
+        CustomerRegistrationRequest.Body body = CustomerRegistrationRequest.Body.builder()
+                .uuid(uuid)
+                .merchantCode(merchantCode)
+                .merchantName(merchantName)
+                .mobileNumber(mobileNumber)
+                .countryCode(countryCode)
+                .build();
+
+        // Construct the full request
         return CustomerRegistrationRequest.builder()
                 .request(CustomerRegistrationRequest.Request.builder()
-                        .header(CustomerRegistrationRequest.Header.builder()
-                                .timestamp(timestamp)
-                                .channelDetails(CustomerRegistrationRequest.ChannelDetails.builder()
-                                        .channelID("MOB")
-                                        .channelType("WEB")
-                                        .channelSubClass("Retail")
-                                        .branchCode("")
-                                        .channelCusHdr(CustomerRegistrationRequest.ChannelCusHdr.builder()
-                                                .channelProtocol("")
-                                                .build())
-                                        .build())
-                                .deviceDetails(CustomerRegistrationRequest.DeviceDetails.builder()
-                                        .deviceID("")
-                                        .imeiNumber("")
-                                        .clientIP("")
-                                        .os("")
-                                        .browserType("")
-                                        .mobileNumber("")
-                                        .geoLocation(CustomerRegistrationRequest.GeoLocation.builder()
-                                                .latitude("")
-                                                .longitude("")
-                                                .build())
-                                        .build())
-                                .build())
-                        .body(CustomerRegistrationRequest.Body.builder()
-                                .uuid(uuid)
-                                .merchantCode(merchantCode)
-                                .merchantName(merchantName)
-                                .mobileNumber(mobileNumber)
-                                .countryCode(countryCode)
-                                .build())
+                        .header(convertToCustomerHeader(header))
+                        .body(body)
                         .build())
                 .build();
     }
 
     /**
-     * Mask sensitive data in logs (mobile numbers, PAN, Aadhaar).
+     * Convert base header to CustomerRegistrationRequest.Header.
+     * This is needed because CustomerRegistrationRequest has its own Header class.
      */
-    private String maskSensitiveData(String data) {
-        if (data == null) return null;
-        return data.replaceAll("\"mobileNumber\":\"(\\d+)\"", "\"mobileNumber\":\"XXXXXXX\"")
-                   .replaceAll("\"pan\":\"([A-Z0-9]+)\"", "\"pan\":\"XXXXX\"")
-                   .replaceAll("\"aadhaar\":\"(\\d+)\"", "\"aadhaar\":\"XXXXX\"");
+    private CustomerRegistrationRequest.Header convertToCustomerHeader(BaseApiRequest.Header baseHeader) {
+        return CustomerRegistrationRequest.Header.builder()
+                .timestamp(baseHeader.getTimestamp())
+                .channelDetails(convertChannelDetails(baseHeader.getChannelDetails()))
+                .deviceDetails(convertDeviceDetails(baseHeader.getDeviceDetails()))
+                .build();
+    }
+
+    private CustomerRegistrationRequest.ChannelDetails convertChannelDetails(BaseApiRequest.ChannelDetails base) {
+        return CustomerRegistrationRequest.ChannelDetails.builder()
+                .channelID(base.getChannelID())
+                .channelType(base.getChannelType())
+                .channelSubClass(base.getChannelSubClass())
+                .branchCode(base.getBranchCode())
+                .channelCusHdr(CustomerRegistrationRequest.ChannelCusHdr.builder()
+                        .channelProtocol(base.getChannelCusHdr().getChannelProtocol())
+                        .build())
+                .build();
+    }
+
+    private CustomerRegistrationRequest.DeviceDetails convertDeviceDetails(BaseApiRequest.DeviceDetails base) {
+        return CustomerRegistrationRequest.DeviceDetails.builder()
+                .deviceID(base.getDeviceID())
+                .imeiNumber(base.getImeiNumber())
+                .clientIP(base.getClientIP())
+                .os(base.getOS())
+                .browserType(base.getBrowserType())
+                .mobileNumber(base.getMobileNumber())
+                .geoLocation(CustomerRegistrationRequest.GeoLocation.builder()
+                        .latitude(base.getGeoLocation().getLatitude())
+                        .longitude(base.getGeoLocation().getLongitude())
+                        .build())
+                .build();
     }
 }
