@@ -121,6 +121,13 @@ public class AuthController {
                     && registrationResponse.getResponse().getBody() != null) {
                 session.setAttribute("CUSTOMER_REGISTRATION_DATA", registrationResponse);
                 logger.info("Customer registration details fetched and stored in session");
+
+                // Store customer count for profile selection (if multiple profiles exist)
+                if (registrationResponse.getResponse().getBody().getCustDetails() != null) {
+                    int customerCount = registrationResponse.getResponse().getBody().getCustDetails().size();
+                    session.setAttribute("CUSTOMER_COUNT", customerCount);
+                    logger.info("Found {} customer profile(s) for mobile number", customerCount);
+                }
             } else {
                 logger.warn("Empty customer registration response received");
             }
@@ -203,6 +210,107 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         userJourneyLogger.logLoginSuccess(mobile);
+
+        // Check if multiple customer profiles exist
+        Integer customerCount = (Integer) session.getAttribute("CUSTOMER_COUNT");
+
+        if (customerCount != null && customerCount > 1) {
+            // Multiple profiles - redirect to profile selection page
+            session.setAttribute("PROFILE_SELECTION_REQUIRED", true);
+            logger.info("Multiple profiles detected ({}), redirecting to profile selection", customerCount);
+            return "redirect:/select-profile";
+        } else {
+            // Single profile - auto-select and continue to dashboard
+            CustomerRegistrationResponse registrationData =
+                    (CustomerRegistrationResponse) session.getAttribute("CUSTOMER_REGISTRATION_DATA");
+
+            if (registrationData != null && registrationData.getResponse() != null
+                    && registrationData.getResponse().getBody() != null
+                    && registrationData.getResponse().getBody().getCustDetails() != null
+                    && !registrationData.getResponse().getBody().getCustDetails().isEmpty()) {
+
+                session.setAttribute("SELECTED_PROFILE",
+                        registrationData.getResponse().getBody().getCustDetails().get(0));
+                logger.info("Single profile auto-selected");
+            }
+
+            return "redirect:/dashboard";
+        }
+    }
+
+    @GetMapping("/select-profile")
+    public String selectProfilePage(HttpSession session, Model model) {
+        // Check if user is authenticated
+        String mobile = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (mobile == null || "anonymousUser".equals(mobile)) {
+            return "redirect:/login";
+        }
+
+        // Check if profile selection is required
+        Boolean profileSelectionRequired = (Boolean) session.getAttribute("PROFILE_SELECTION_REQUIRED");
+        if (profileSelectionRequired == null || !profileSelectionRequired) {
+            // Profile already selected or not needed
+            return "redirect:/dashboard";
+        }
+
+        // Get customer profiles from session
+        CustomerRegistrationResponse registrationData =
+                (CustomerRegistrationResponse) session.getAttribute("CUSTOMER_REGISTRATION_DATA");
+
+        if (registrationData == null || registrationData.getResponse() == null
+                || registrationData.getResponse().getBody() == null
+                || registrationData.getResponse().getBody().getCustDetails() == null) {
+            logger.error("No customer registration data found in session");
+            return "redirect:/login";
+        }
+
+        model.addAttribute("customerProfiles", registrationData.getResponse().getBody().getCustDetails());
+        userJourneyLogger.logPageVisit(mobile, "Profile Selection");
+
+        return "select-profile";
+    }
+
+    @PostMapping("/confirm-profile")
+    public String confirmProfile(@org.springframework.web.bind.annotation.RequestParam("selectedCifId") String selectedCifId,
+            HttpSession session,
+            Model model) {
+
+        String mobile = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        if (selectedCifId == null || selectedCifId.trim().isEmpty()) {
+            model.addAttribute("error", "Please select a profile to continue");
+            return "redirect:/select-profile";
+        }
+
+        // Get customer profiles from session
+        CustomerRegistrationResponse registrationData =
+                (CustomerRegistrationResponse) session.getAttribute("CUSTOMER_REGISTRATION_DATA");
+
+        if (registrationData == null || registrationData.getResponse() == null
+                || registrationData.getResponse().getBody() == null) {
+            return "redirect:/login";
+        }
+
+        // Find the selected profile
+        var custDetails = registrationData.getResponse().getBody().getCustDetails();
+        var selectedProfile = custDetails.stream()
+                .filter(profile -> selectedCifId.equals(profile.getCifID()))
+                .findFirst()
+                .orElse(null);
+
+        if (selectedProfile == null) {
+            logger.error("Selected profile not found: {}", selectedCifId);
+            model.addAttribute("error", "Invalid profile selection");
+            return "redirect:/select-profile";
+        }
+
+        // Store selected profile in session
+        session.setAttribute("SELECTED_PROFILE", selectedProfile);
+        session.setAttribute("PROFILE_SELECTION_REQUIRED", false);
+
+        logger.info("Profile selected: CIF ID = {}", selectedCifId);
+        userJourneyLogger.logTransactionSuccess(mobile, "Profile Selection");
+
         return "redirect:/dashboard";
     }
 
@@ -227,10 +335,22 @@ public class AuthController {
         String mobile = SecurityContextHolder.getContext().getAuthentication().getName();
         userJourneyLogger.logPageVisit(mobile, "Dashboard");
 
-        // Fetch Customer Details
-        CustomerProfileResponse profile = customerIntegrationService.getCustomerProfile(mobile);
-        model.addAttribute("customerName", profile.getFullName());
-        model.addAttribute("customerEmail", profile.getEmail());
+        // Get selected customer profile from session
+        CustomerRegistrationResponse.CustomerDetails selectedProfile =
+                (CustomerRegistrationResponse.CustomerDetails) session.getAttribute("SELECTED_PROFILE");
+
+        if (selectedProfile != null) {
+            model.addAttribute("customerName", selectedProfile.getCustName());
+            model.addAttribute("cifId", selectedProfile.getCifID());
+            model.addAttribute("accountCount", selectedProfile.getOperativeAcctCnt());
+            // Email not available in registration response, using placeholder
+            model.addAttribute("customerEmail", "");
+        } else {
+            // Fallback to old method if no profile selected
+            CustomerProfileResponse profile = customerIntegrationService.getCustomerProfile(mobile);
+            model.addAttribute("customerName", profile.getFullName());
+            model.addAttribute("customerEmail", profile.getEmail());
+        }
 
         return "dashboard";
     }
