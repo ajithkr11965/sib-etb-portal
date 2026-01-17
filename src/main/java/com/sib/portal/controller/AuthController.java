@@ -4,11 +4,14 @@ import com.sib.portal.dto.LoginRequest;
 import com.sib.portal.dto.OtpRequest;
 import com.sib.portal.dto.CardRequestPayload;
 import com.sib.portal.dto.CustomerProfileResponse;
+import com.sib.portal.dto.CustomerRegistrationResponse;
 import com.sib.portal.service.CaptchaService;
 import com.sib.portal.service.CardIntegrationService;
 import com.sib.portal.service.CustomerIntegrationService;
 import com.sib.portal.service.OtpService;
 import com.sib.portal.service.UserJourneyLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -28,6 +31,8 @@ import java.util.Collections;
 
 @Controller
 public class AuthController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     private final OtpService otpService;
     private final CaptchaService captchaService;
@@ -100,6 +105,32 @@ public class AuthController {
             bindingResult.rejectValue("captcha", "error.captcha", "Invalid Captcha");
             model.addAttribute("captchaText", sessionCaptcha);
             userJourneyLogger.logLoginFailure(loginRequest.getMobileNumber(), "Invalid Captcha");
+            return "login";
+        }
+
+        // Fetch customer details from registration API
+        try {
+            logger.info("Fetching customer registration details for mobile: XXXXXXX{}",
+                    loginRequest.getMobileNumber().substring(loginRequest.getMobileNumber().length() - 4));
+
+            CustomerRegistrationResponse registrationResponse =
+                    customerIntegrationService.getCustomerRegistrationDetails(loginRequest.getMobileNumber());
+
+            // Store customer details in session for later use
+            if (registrationResponse != null && registrationResponse.getResponse() != null
+                    && registrationResponse.getResponse().getBody() != null) {
+                session.setAttribute("CUSTOMER_REGISTRATION_DATA", registrationResponse);
+                logger.info("Customer registration details fetched and stored in session");
+            } else {
+                logger.warn("Empty customer registration response received");
+            }
+
+        } catch (Exception e) {
+            logger.error("Error fetching customer registration details: {}", e.getMessage(), e);
+            bindingResult.rejectValue("mobileNumber", "error.mobileNumber",
+                    "Unable to verify customer details. Please try again later.");
+            model.addAttribute("captchaText", sessionCaptcha);
+            userJourneyLogger.logLoginFailure(loginRequest.getMobileNumber(), "Customer API Error");
             return "login";
         }
 
