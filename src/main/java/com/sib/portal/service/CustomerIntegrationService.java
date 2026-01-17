@@ -59,6 +59,11 @@ public class CustomerIntegrationService {
         logger.info("Fetching customer registration details for mobile: XXXXXXX{}",
                     mobileNumber.substring(mobileNumber.length() - 4));
 
+        // Mock response for testing
+        if (mockEnabled) {
+            return buildMockRegistrationResponse(mobileNumber);
+        }
+
         try {
             // Build the request payload
             CustomerRegistrationRequest request = buildRegistrationRequest(mobileNumber);
@@ -89,6 +94,153 @@ public class CustomerIntegrationService {
             logger.error("Error fetching customer registration details: {}", e.getMessage(), e);
             throw new Exception("Failed to fetch customer details: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Build mock registration response for testing.
+     * Returns multiple profiles if mobile ends with '999', otherwise single profile.
+     */
+    private CustomerRegistrationResponse buildMockRegistrationResponse(String mobileNumber) {
+        String uuid = BaseApiRequest.generateRequestUUID();
+        boolean multipleProfiles = mobileNumber.endsWith("999");
+
+        logger.info("[MOCK] Generating {} profile(s) for testing",
+                multipleProfiles ? "multiple" : "single");
+
+        // Build Response Header
+        CustomerRegistrationResponse.ResponseHeader responseHeader =
+                CustomerRegistrationResponse.ResponseHeader.builder()
+                        .timestamp(java.time.LocalDateTime.now().format(
+                                java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
+                        .apiName("CustomerRegistration")
+                        .apiVersion("1.0")
+                        .interfaceName("REST")
+                        .build();
+
+        // Build Status
+        CustomerRegistrationResponse.Status status =
+                CustomerRegistrationResponse.Status.builder()
+                        .code("200")
+                        .desc("Success")
+                        .build();
+
+        // Build Customer Details
+        java.util.List<CustomerRegistrationResponse.CustomerDetails> custDetailsList =
+                new java.util.ArrayList<>();
+
+        if (multipleProfiles) {
+            // Profile 1 - Parent
+            custDetailsList.add(buildMockCustomerDetails(
+                    "A55835680",
+                    "GOPIKRISHNAN T M",
+                    "14-08-1992",
+                    "XXXX1234",
+                    "ABCDE1234F",
+                    "2"
+            ));
+
+            // Profile 2 - Child
+            custDetailsList.add(buildMockCustomerDetails(
+                    "A55835681",
+                    "GOPIKRISHNAN JUNIOR",
+                    "01-05-2015",
+                    "XXXX5678",
+                    "",
+                    "1"
+            ));
+
+            // Profile 3 - Spouse
+            custDetailsList.add(buildMockCustomerDetails(
+                    "A55835682",
+                    "GOPIKRISHNA T M",
+                    "20-03-1995",
+                    "XXXX9012",
+                    "FGHIJ5678K",
+                    "1"
+            ));
+        } else {
+            // Single profile
+            custDetailsList.add(buildMockCustomerDetails(
+                    "A55835680",
+                    "GOPIKRISHNAN T M",
+                    "14-08-1992",
+                    "XXXX1234",
+                    "ABCDE1234F",
+                    "2"
+            ));
+        }
+
+        // Build Response Body
+        CustomerRegistrationResponse.ResponseBody responseBody =
+                CustomerRegistrationResponse.ResponseBody.builder()
+                        .uuid(uuid)
+                        .registerType("NEW")
+                        .custDetails(custDetailsList)
+                        .build();
+
+        // Build complete Response
+        CustomerRegistrationResponse.Response response =
+                CustomerRegistrationResponse.Response.builder()
+                        .header(responseHeader)
+                        .status(status)
+                        .body(responseBody)
+                        .build();
+
+        return CustomerRegistrationResponse.builder()
+                .response(response)
+                .build();
+    }
+
+    /**
+     * Build a single mock customer details object.
+     */
+    private CustomerRegistrationResponse.CustomerDetails buildMockCustomerDetails(
+            String cifId, String custName, String dob, String aadhaar, String pan, String acctCnt) {
+
+        // Build mock account details
+        java.util.List<CustomerRegistrationResponse.AccountDetails> accountDetailsList =
+                new java.util.ArrayList<>();
+
+        // Add primary account
+        accountDetailsList.add(CustomerRegistrationResponse.AccountDetails.builder()
+                .foracid("12345678901234")
+                .schemCode("SB01")
+                .modeofOper("SINGLE")
+                .acctName(custName)
+                .tranFlag("Y")
+                .schemType("SB")
+                .schemDesc("Savings Account")
+                .branchCode("0001")
+                .branchName("Main Branch")
+                .ifscCode("SIBL0000001")
+                .build());
+
+        // Add second account if count is 2
+        if ("2".equals(acctCnt)) {
+            accountDetailsList.add(CustomerRegistrationResponse.AccountDetails.builder()
+                    .foracid("12345678901235")
+                    .schemCode("CA01")
+                    .modeofOper("SINGLE")
+                    .acctName(custName)
+                    .tranFlag("Y")
+                    .schemType("CA")
+                    .schemDesc("Current Account")
+                    .branchCode("0001")
+                    .branchName("Main Branch")
+                    .ifscCode("SIBL0000001")
+                    .build());
+        }
+
+        return CustomerRegistrationResponse.CustomerDetails.builder()
+                .cifID(cifId)
+                .constCode("001")
+                .custDOB(dob)
+                .custName(custName)
+                .aadhaar(aadhaar)
+                .pan(pan)
+                .operativeAcctCnt(acctCnt)
+                .accountDetails(accountDetailsList)
+                .build();
     }
 
     /**
