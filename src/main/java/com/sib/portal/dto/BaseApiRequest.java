@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.UUID;
+import java.util.Random;
 
 /**
  * Base request structure for all API calls.
@@ -18,6 +18,11 @@ import java.util.UUID;
 public class BaseApiRequest {
 
     private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+    private static final DateTimeFormatter UUID_TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyMMddHHmmss");
+    private static final Random RANDOM = new Random();
+
+    // Application identifier for request tracking
+    private static final String APP_IDENTIFIER = "WP"; // WP = Web Portal
 
     /**
      * Standard Header structure used across all APIs.
@@ -179,9 +184,35 @@ public class BaseApiRequest {
     }
 
     /**
-     * Generate a 16-character UUID for request tracking.
+     * Generate a 16-character traceable UUID for request tracking.
+     *
+     * Format: WPYYMMDDHHMMSSRR
+     * - WP: Application identifier (Web Portal)
+     * - YYMMDDHHMMSS: Timestamp (12 digits)
+     * - RR: Random digits (2 digits) for uniqueness
+     *
+     * Example: WP26011716300045
+     * - WP: Web Portal
+     * - 260117: January 17, 2026
+     * - 163000: 4:30:00 PM
+     * - 45: Random digits
+     *
+     * This pattern allows ESB team to:
+     * 1. Identify the source application (WP)
+     * 2. Know when the request was made (timestamp)
+     * 3. Track unique requests (random suffix)
+     *
+     * @return 16-character traceable UUID
      */
     public static String generateRequestUUID() {
-        return UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+        // Get timestamp in YYMMDDHHMMSS format (12 digits)
+        String timestamp = LocalDateTime.now().format(UUID_TIMESTAMP_FORMAT);
+
+        // Generate 2 random digits for uniqueness
+        int randomSuffix = RANDOM.nextInt(100); // 0-99
+        String randomStr = String.format("%02d", randomSuffix);
+
+        // Combine: APP_IDENTIFIER (2) + timestamp (12) + random (2) = 16 chars
+        return APP_IDENTIFIER + timestamp + randomStr;
     }
 }

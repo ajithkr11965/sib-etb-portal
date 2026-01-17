@@ -37,9 +37,28 @@ Provides:
 // Get standard header
 BaseApiRequest.Header header = BaseApiRequest.HeaderBuilder.buildStandardHeader();
 
-// Generate UUID
+// Generate traceable UUID
 String uuid = BaseApiRequest.generateRequestUUID();
 ```
+
+### 3. Request UUID Pattern
+**Format:** `WPYYMMDDHHMMSSRR` (16 characters)
+
+- **WP**: Application identifier (Web Portal)
+- **YYMMDDHHMMSS**: Timestamp (12 digits)
+- **RR**: Random digits (2 digits) for uniqueness
+
+**Example:** `WP26011716300045`
+- `WP`: Web Portal
+- `260117`: January 17, 2026
+- `163000`: 4:30:00 PM
+- `45`: Random digits
+
+**Benefits for ESB Team:**
+- ✅ Identify source application by prefix (WP)
+- ✅ Know exact time of request from timestamp
+- ✅ Track unique requests with random suffix
+- ✅ Easy debugging and log correlation
 
 ## Adding a New API (Quick Guide)
 
